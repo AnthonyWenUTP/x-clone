@@ -7,6 +7,8 @@
 /backend/node_modules
 /backend/build
 
+/backend/generated/prisma
+
 # Logs
 /backend/logs
 /backend/*.log
