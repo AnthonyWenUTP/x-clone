@@ -7,6 +7,7 @@ import { PrismaService } from './database/prisma.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database/database.module';
+import { FollowsModule } from './modules/follows/follows.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
     AuthModule,
     UsersModule,
     DatabaseModule,
+    FollowsModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
