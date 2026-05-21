@@ -46,7 +46,7 @@ model Post {
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  replyTo Post? @relation("PostReplies", fields: [replyToId], references: [id])
+  replyTo Post? @relation("PostReplies", fields: [replyToId], references: [id], onDelete: Cascade)
 
   replies Post[] @relation("PostReplies")
 

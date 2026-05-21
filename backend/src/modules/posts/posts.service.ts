@@ -14,11 +14,11 @@ export class PostsService {
         authorId: string,
         dto: CreatePostDto,
     ) {
-        if (dto.parentPostId) {
+        if (dto.replyToId) {
             const parentPost =
                 await this.prisma.post.findUnique({
                     where: {
-                        id: dto.parentPostId,
+                        id: dto.replyToId,
                     },
                 });
 
@@ -33,7 +33,7 @@ export class PostsService {
             data: {
                 content: dto.content,
                 authorId,
-                parentPostId: dto.parentPostId,
+                replyToId: dto.replyToId,
             },
 
             include: {
@@ -141,7 +141,7 @@ export class PostsService {
             where: {
                 authorId: user.id,
 
-                parentPostId: null,
+                replyToId: null,
             },
 
             orderBy: {
