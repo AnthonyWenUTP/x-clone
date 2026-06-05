@@ -10,6 +10,27 @@ export class PostsService {
         private readonly prisma: PrismaService,
     ) { }
 
+    private mapPost(post: any) {
+        return {
+            id: post.id,
+            content: post.content,
+            createdAt: post.createdAt,
+
+            replyToId: post.replyToId,
+
+            author: {
+                id: post.author.id,
+                username: post.author.username,
+                avatarUrl: post.author.avatarUrl,
+            },
+
+            stats: {
+                likes: post._count.likes,
+                replies: post._count.replies,
+            },
+        };
+    }
+
     async createPost(
         authorId: string,
         dto: CreatePostDto,
@@ -28,31 +49,33 @@ export class PostsService {
                 );
             }
         }
-
-        return this.prisma.post.create({
-            data: {
-                content: dto.content,
-                authorId,
-                replyToId: dto.replyToId,
-            },
-
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true,
-                        avatarUrl: true,
-                    },
+        const post =
+            await this.prisma.post.create({
+                data: {
+                    content: dto.content,
+                    authorId,
+                    replyToId: dto.replyToId,
                 },
 
-                _count: {
-                    select: {
-                        likes: true,
-                        replies: true,
+                include: {
+                    author: {
+                        select: {
+                            id: true,
+                            username: true,
+                            avatarUrl: true,
+                        },
+                    },
+
+                    _count: {
+                        select: {
+                            likes: true,
+                            replies: true,
+                        },
                     },
                 },
-            },
-        });
+            });
+
+        return this.mapPost(post);
     }
 
     async deletePost(
@@ -118,7 +141,7 @@ export class PostsService {
             );
         }
 
-        return post;
+        return this.mapPost(post);
     }
 
     async getUserTimeline(
@@ -185,7 +208,9 @@ export class PostsService {
         }
 
         return {
-            data: posts,
+            data: posts.map((post) =>
+                this.mapPost(post),
+            ),
 
             nextCursor,
         };
