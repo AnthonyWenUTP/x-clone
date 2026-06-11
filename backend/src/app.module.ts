@@ -9,6 +9,7 @@ import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database/database.module';
 import { FollowsModule } from './modules/follows/follows.module';
 import { PostsModule } from './modules/posts/posts.module';
+import { FeedModule } from './modules/feed/feed.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PostsModule } from './modules/posts/posts.module';
     DatabaseModule,
     FollowsModule,
     PostsModule,
+    FeedModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
