@@ -1,31 +1,30 @@
 import { Post } from './types';
+import { useLikePost } from './use-posts';
 
 export function PostCard({
     post,
 }: {
     post: Post;
 }) {
+    const like = useLikePost();
     return (
-        <article className="border-b p-4">
-            <div>
-                <strong>
-                    {post.author.username}
-                </strong>
-            </div>
+        <article>
+            <strong>
+                {post.author.username}
+            </strong>
 
-            <p className="mt-2">
+            <p>
                 {post.content}
             </p>
 
-            <div className="mt-3 text-sm">
-                Likes:
-                {' '}
-                {post.stats.likes}
-                {' '}
-                Replies:
-                {' '}
-                {post.stats.replies}
-            </div>
-        </article>
+            <button
+                onClick={() =>
+                    like.mutate(post.id)
+                }
+            >
+                ❤️ {post.stats.likes}
+            </button>
+
+        </article> 
     );
 }

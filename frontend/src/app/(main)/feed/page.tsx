@@ -2,6 +2,7 @@
 import { useFeed } from '@/features/feed/use-feed';
 import { PostCard } from '@/features/posts/PostCard';
 import { PaginatedPosts } from '@/features/posts/types';
+import { PostComposer } from '@/features/posts/PostComposer';
 
 export default function FeedPage() {
     const feed = useFeed();
@@ -11,8 +12,9 @@ export default function FeedPage() {
 
     return (
         <main>
+            <PostComposer />
             {feed.data?.pages.map(
-                (page: PaginatedPosts) =>
+                (page) =>
                     page.data.map(
                         (post) => (
                             <PostCard
