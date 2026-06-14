@@ -21,3 +21,9 @@ export interface PaginatedPosts {
     data: Post[];
     nextCursor: string | null;
 }
+
+export interface MediaAttachment {
+    id: string;
+    url: string;
+    type: 'IMAGE' | 'VIDEO';
+}
