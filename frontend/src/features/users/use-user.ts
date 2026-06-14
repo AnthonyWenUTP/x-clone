@@ -1,5 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getUserProfile, followUser, unfollowUser } from './api';
+import { InfiniteData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getUserProfile, followUser, unfollowUser, getUserPosts } from './api';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import type { PaginatedPosts } from '../posts/types';
 
 export function useUserProfile(
     username: string,
@@ -37,4 +39,32 @@ export function useUnfollowUser() {
             });
         },
     });
+}
+
+export function useUserPosts(username: string) {
+
+    return useInfiniteQuery
+        <
+            PaginatedPosts,
+            Error,
+            InfiniteData<PaginatedPosts>,
+            [string, string],
+            string | undefined
+        >({
+
+            queryKey: ['user-posts', username],
+
+            queryFn: ({
+                pageParam,
+            }) => {
+                return getUserPosts(
+                    username,
+                    pageParam,
+                );
+            },
+
+            initialPageParam: undefined,
+            getNextPageParam: (lastPage) => { return lastPage.nextCursor ?? undefined; },
+        });
+
 }
