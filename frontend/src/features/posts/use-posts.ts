@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createPost, createReply, CreateReplyInput } from './api';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
+import { createPost, createReply, CreateReplyInput, getThread } from './api';
 import { likePost, unlikePost } from './likes';
 
 export function useCreatePost() {
@@ -45,7 +45,21 @@ export function useCreateReply() {
                         'feed'
                     ]
                 });
+                client.invalidateQueries({
+                    queryKey: [
+                        'thread'
+                    ]
+                });
             },
         });
+}
 
+export function useThread(id: string) {
+    return useQuery({
+        queryKey: [
+            'thread',
+            id,
+        ],
+        queryFn: () => getThread(id),
+    });
 }

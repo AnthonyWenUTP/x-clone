@@ -15,12 +15,17 @@ export async function createPost(data: CreatePostDto) {
     return response.data;
 }
 
-export async function createReply(input: CreateReplyInput ) {
+export async function createReply(input: CreateReplyInput) {
     const response = await api.post(`/posts/${input.postId}/replies`,
         {
             content:
                 input.content,
         },
     );
+    return response.data;
+}
+
+export async function getThread(id: string) {
+    const response = await api.get(`/posts/${id}/thread`);
     return response.data;
 }

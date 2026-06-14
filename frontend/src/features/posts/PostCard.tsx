@@ -1,5 +1,6 @@
 import { Post } from './types';
 import { useLikePost } from './use-posts';
+import Link from 'next/link';
 
 export function PostCard({
     post,
@@ -24,7 +25,9 @@ export function PostCard({
             >
                 ❤️ {post.stats.likes}
             </button>
-
-        </article> 
+            <Link href={`/posts/${post.id}`}>
+                Reply
+            </Link>
+        </article>
     );
 }
