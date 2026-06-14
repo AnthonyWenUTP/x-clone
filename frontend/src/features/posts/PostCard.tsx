@@ -18,6 +18,18 @@ export function PostCard({
                 {post.content}
             </p>
 
+            {
+                post.media?.map(
+                    media => (
+                        <img
+                            key={media.id}
+                            src={media.url}
+                            className="rounded"
+                        />
+                    )
+                )
+            }
+            
             <button
                 onClick={() =>
                     like.mutate(post.id)

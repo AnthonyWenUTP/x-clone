@@ -15,6 +15,8 @@ export interface Post {
     };
 
     replyToId: string | null;
+
+    media:MediaAttachment[];
 }
 
 export interface PaginatedPosts {

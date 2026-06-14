@@ -24,6 +24,7 @@ export class PostsService {
                 username: post.author.username,
                 avatarUrl: post.author.avatarUrl,
             },
+            media: post.media ?? [],
 
             stats: {
                 likes: post._count.likes,
@@ -32,10 +33,7 @@ export class PostsService {
         };
     }
 
-    async createPost(
-        authorId: string,
-        dto: CreatePostDto,
-    ) {
+    async createPost(authorId: string, dto: CreatePostDto) {
         if (dto.replyToId) {
             const parentPost =
                 await this.prisma.post.findUnique({
@@ -56,6 +54,7 @@ export class PostsService {
                     content: dto.content,
                     authorId,
                     replyToId: dto.replyToId,
+                    media: dto.mediaIds?.length ? { connect: dto.mediaIds.map(id => ({ id })) } : undefined,
                 },
 
                 include: {
@@ -66,6 +65,8 @@ export class PostsService {
                             avatarUrl: true,
                         },
                     },
+
+                    media: true,
 
                     _count: {
                         select: {
@@ -126,6 +127,8 @@ export class PostsService {
                         avatarUrl: true,
                     },
                 },
+
+                media: true,
 
                 _count: {
                     select: {
@@ -191,6 +194,8 @@ export class PostsService {
                     },
                 },
 
+                media: true,
+
                 _count: {
                     select: {
                         likes: true,
@@ -225,7 +230,7 @@ export class PostsService {
             throw new NotFoundException('Post not found');
         }
 
-        return this.prisma.post.create({
+        const reply = await this.prisma.post.create({
             data: {
                 content: dto.content,
                 author: {
@@ -240,12 +245,25 @@ export class PostsService {
                 }
             },
 
-            include: { author: true }
+            include: {
+                author: true,
+
+                media: true,
+
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    }
+                }
+            }
         });
+
+        return this.mapPost(reply);
     }
 
     async getThread(postId: string) {
-        return this.prisma.post.findUnique({
+        const thread = await this.prisma.post.findUnique({
             where: {
                 id: postId,
             },
@@ -261,5 +279,7 @@ export class PostsService {
                 }
             }
         });
+
+        return thread;
     }
 }
