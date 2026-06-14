@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CreateReplyDto } from './dto/create-reply.dto';
 
 const TIMELINE_PAGE_SIZE = 20;
 
@@ -214,5 +215,51 @@ export class PostsService {
 
             nextCursor,
         };
+    }
+
+    async createReply(postId: string, userId: string, dto: CreateReplyDto) {
+
+        const parent = await this.prisma.post.findUnique({ where: { id: postId } });
+
+        if (!parent) {
+            throw new NotFoundException('Post not found');
+        }
+
+        return this.prisma.post.create({
+            data: {
+                content: dto.content,
+                author: {
+                    connect: {
+                        id: userId
+                    }
+                },
+                replyTo: {
+                    connect: {
+                        id: postId
+                    }
+                }
+            },
+
+            include: { author: true }
+        });
+    }
+
+    async getThread(postId: string) {
+        return this.prisma.post.findUnique({
+            where: {
+                id: postId,
+            },
+            include: {
+                author: true,
+                replies: {
+                    orderBy: {
+                        createdAt: 'asc'
+                    },
+                    include: {
+                        author: true
+                    }
+                }
+            }
+        });
     }
 }

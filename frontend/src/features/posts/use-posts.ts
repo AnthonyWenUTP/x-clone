@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createPost } from './api';
+import { createPost, createReply, CreateReplyInput } from './api';
 import { likePost, unlikePost } from './likes';
 
 export function useCreatePost() {
@@ -27,5 +27,25 @@ export function useLikePost() {
             });
         },
     });
+
+}
+
+export function useCreateReply() {
+    const client = useQueryClient();
+
+    return useMutation
+        <
+            unknown,
+            Error,
+            CreateReplyInput
+        >({
+            mutationFn: createReply, onSuccess() {
+                client.invalidateQueries({
+                    queryKey: [
+                        'feed'
+                    ]
+                });
+            },
+        });
 
 }
