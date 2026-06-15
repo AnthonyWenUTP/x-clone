@@ -1,10 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class LikesService {
     constructor(
         private readonly prisma: PrismaService,
+        private readonly notificationsService: NotificationsService
     ) { }
 
     async likePost(
@@ -40,6 +42,12 @@ export class LikesService {
             update: {},
         });
 
+        await this.notificationsService.createLikeNotification(
+            userId,
+            postId,
+            post.authorId
+        );
+        
         return {
             success: true,
         };

@@ -12,6 +12,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { LikesModule } from './modules/likes/likes.module';
 import { SearchModule } from './modules/search/search.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SearchModule } from './modules/search/search.module';
     FeedModule,
     LikesModule,
     SearchModule,
+    NotificationsModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
