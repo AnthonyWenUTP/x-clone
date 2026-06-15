@@ -24,7 +24,7 @@ mkdir.py
 .DS_Store
 
 # Tests
-/coverage
+/backend/coverage
 /.nyc_output
 
 # IDEs and editors

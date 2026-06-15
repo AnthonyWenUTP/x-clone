@@ -2,7 +2,6 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { PrismaService } from '../../database/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
-import { NotificationsService } from '../notifications/notifications.service';
 
 const TIMELINE_PAGE_SIZE = 20;
 
@@ -10,7 +9,6 @@ const TIMELINE_PAGE_SIZE = 20;
 export class PostsService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly notificationsService: NotificationsService
     ) { }
 
     private mapPost(post: any) {
