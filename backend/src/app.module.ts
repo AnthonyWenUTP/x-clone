@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 import appConfig from './config/app.config';
 import { envValidationSchema } from './config/env.validation';
+
 import { PrismaService } from './database/prisma.service';
+
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { DatabaseModule } from './database/database.module';
@@ -15,6 +18,11 @@ import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
 
+import { HealthModule } from './common/health/health.module';
+import { HealthController } from './common/health/health.controller';
+
+
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,6 +30,14 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
       load: [appConfig],
       validationSchema: envValidationSchema,
     }),
+
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60, // seconds (NOT ms)
+        limit: 100,
+      },
+    ]),
+
     AuthModule,
     UsersModule,
     DatabaseModule,
@@ -32,8 +48,11 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     SearchModule,
     NotificationsModule,
     RealtimeModule,
+    HealthModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
+  controllers: [HealthController],
 })
-export class AppModule {}
+
+export class AppModule { }

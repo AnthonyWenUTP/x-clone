@@ -8,6 +8,7 @@ export function PostCard({
     post: Post;
 }) {
     const like = useLikePost();
+    console.log(post);
     return (
         <article>
             <strong>
