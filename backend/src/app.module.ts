@@ -13,6 +13,7 @@ import { FeedModule } from './modules/feed/feed.module';
 import { LikesModule } from './modules/likes/likes.module';
 import { SearchModule } from './modules/search/search.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     LikesModule,
     SearchModule,
     NotificationsModule,
+    RealtimeModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
