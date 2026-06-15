@@ -11,6 +11,7 @@ import { FollowsModule } from './modules/follows/follows.module';
 import { PostsModule } from './modules/posts/posts.module';
 import { FeedModule } from './modules/feed/feed.module';
 import { LikesModule } from './modules/likes/likes.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LikesModule } from './modules/likes/likes.module';
     PostsModule,
     FeedModule,
     LikesModule,
+    SearchModule,
   ],
   providers: [PrismaService],
   exports: [PrismaService],
