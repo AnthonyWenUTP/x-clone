@@ -5,10 +5,7 @@ import { FollowsModule } from '../follows/follows.module';
 import { PostsModule } from '../posts/posts.module';
 
 @Module({
-  imports: [
-    FollowsModule,
-    PostsModule,
-  ],
+  imports: [FollowsModule, PostsModule],
   providers: [UsersService],
   exports: [UsersService],
   controllers: [UsersController],

@@ -21,8 +21,6 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
 import { HealthModule } from './common/health/health.module';
 import { HealthController } from './common/health/health.controller';
 
-
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,5 +52,4 @@ import { HealthController } from './common/health/health.controller';
   exports: [PrismaService],
   controllers: [HealthController],
 })
-
-export class AppModule { }
+export class AppModule {}

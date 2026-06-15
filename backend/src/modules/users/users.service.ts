@@ -39,10 +39,7 @@ export class UsersService {
     });
   }
 
-  async getProfile(
-    username: string,
-    currentUserId?: string,
-  ) {
+  async getProfile(username: string, currentUserId?: string) {
     const user = await this.prisma.user.findUnique({
       where: {
         username,
@@ -65,15 +62,14 @@ export class UsersService {
     let isFollowing = false;
 
     if (currentUserId) {
-      const follow =
-        await this.prisma.follow.findUnique({
-          where: {
-            followerId_followingId: {
-              followerId: currentUserId,
-              followingId: user.id,
-            },
+      const follow = await this.prisma.follow.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: currentUserId,
+            followingId: user.id,
           },
-        });
+        },
+      });
 
       isFollowing = !!follow;
     }

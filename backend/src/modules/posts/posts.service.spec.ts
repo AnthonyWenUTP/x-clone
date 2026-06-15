@@ -33,20 +33,13 @@ describe('PostsService', () => {
         },
       });
 
-      const result = await service.createPost(
-          'user1',
-          {
-            content: 'hello',
-          },
-        );
+      const result = await service.createPost('user1', {
+        content: 'hello',
+      });
 
-      expect(
-        result.content,
-      ).toBe('hello');
+      expect(result.content).toBe('hello');
 
-      expect(
-        prisma.post.create,
-      ).toHaveBeenCalled();
+      expect(prisma.post.create).toHaveBeenCalled();
     });
   });
 
@@ -54,16 +47,11 @@ describe('PostsService', () => {
     it('rejects missing parent post', async () => {
       prisma.post.findUnique.mockResolvedValue(null);
       await expect(
-        service.createPost(
-          'user1',
-          {
-            content: 'reply',
-            replyToId: 'missing',
-          },
-        )
-      ).rejects.toThrow(
-        NotFoundException,
-      );
+        service.createPost('user1', {
+          content: 'reply',
+          replyToId: 'missing',
+        }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

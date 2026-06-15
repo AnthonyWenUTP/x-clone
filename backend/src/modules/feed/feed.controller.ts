@@ -6,22 +6,17 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('feed')
 export class FeedController {
-    constructor(
-        private readonly feedService: FeedService,
-    ) { }
+  constructor(private readonly feedService: FeedService) {}
 
-    @UseGuards(JwtAuthGuard)
-    @Get()
-    getFeed(
-        @CurrentUser()
-        user: { id: string },
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  getFeed(
+    @CurrentUser()
+    user: { id: string },
 
-        @Query()
-        query: FeedQueryDto,
-    ) {
-        return this.feedService.getFeed(
-            user.id,
-            query.cursor,
-        );
-    }
+    @Query()
+    query: FeedQueryDto,
+  ) {
+    return this.feedService.getFeed(user.id, query.cursor);
+  }
 }

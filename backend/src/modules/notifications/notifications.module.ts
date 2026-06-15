@@ -9,4 +9,4 @@ import { RealtimeModule } from '../realtime/realtime.module';
   providers: [NotificationsService],
   exports: [NotificationsService],
 })
-export class NotificationsModule { }
+export class NotificationsModule {}

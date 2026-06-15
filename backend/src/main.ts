@@ -23,13 +23,9 @@ async function bootstrap() {
     }),
   );
 
-  app.use(
-    helmet()
-  );
+  app.use(helmet());
 
-  app.useGlobalFilters(
-    new HttpExceptionFilter()
-  );
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(process.env.PORT ?? 3001);
 

@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -14,25 +18,18 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existingEmail = await this.usersService.findByEmail(
-      dto.email,
-    );
+    const existingEmail = await this.usersService.findByEmail(dto.email);
 
     if (existingEmail) {
-      throw new BadRequestException(
-        'Email is already in use',
-      );
+      throw new BadRequestException('Email is already in use');
     }
 
-    const existingUsername =
-      await this.usersService.findByUsername(
-        dto.username,
-      );
+    const existingUsername = await this.usersService.findByUsername(
+      dto.username,
+    );
 
     if (existingUsername) {
-      throw new BadRequestException(
-        'Username is already in use',
-      );
+      throw new BadRequestException('Username is already in use');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
@@ -60,14 +57,10 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.usersService.findByEmail(
-      dto.email,
-    );
+    const user = await this.usersService.findByEmail(dto.email);
 
     if (!user) {
-      throw new UnauthorizedException(
-        'Invalid credentials',
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const passwordMatches = await bcrypt.compare(
@@ -76,9 +69,7 @@ export class AuthService {
     );
 
     if (!passwordMatches) {
-      throw new UnauthorizedException(
-        'Invalid credentials',
-      );
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     const accessToken = await this.generateAccessToken({

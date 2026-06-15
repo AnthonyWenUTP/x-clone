@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateReplyDto } from './dto/create-reply.dto';
@@ -7,291 +11,271 @@ const TIMELINE_PAGE_SIZE = 20;
 
 @Injectable()
 export class PostsService {
-    constructor(
-        private readonly prisma: PrismaService,
-    ) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-    private mapPost(post: any) {
-        return {
-            id: post.id,
-            content: post.content,
-            createdAt: post.createdAt,
-            replyToId: post.replyToId,
+  private mapPost(post: any) {
+    return {
+      id: post.id,
+      content: post.content,
+      createdAt: post.createdAt,
+      replyToId: post.replyToId,
 
-            author: {
-                id: post.author.id,
-                username: post.author.username,
-                avatarUrl: post.author.avatarUrl,
-            },
+      author: {
+        id: post.author.id,
+        username: post.author.username,
+        avatarUrl: post.author.avatarUrl,
+      },
 
-            media: post.media ?? [],
+      media: post.media ?? [],
 
-            stats: {
-                likes: post._count?.likes ?? 0,
-                replies: post._count?.replies ?? 0,
-            },
+      stats: {
+        likes: post._count?.likes ?? 0,
+        replies: post._count?.replies ?? 0,
+      },
 
-            replies: post.replies?.map((reply: any) => ({
-                id: reply.id,
-                content: reply.content,
-                createdAt: reply.createdAt,
-                author: {
-                    id: reply.author.id,
-                    username: reply.author.username,
-                    avatarUrl: reply.author.avatarUrl,
-                },
-            })) ?? [],
-        };
+      replies:
+        post.replies?.map((reply: any) => ({
+          id: reply.id,
+          content: reply.content,
+          createdAt: reply.createdAt,
+          author: {
+            id: reply.author.id,
+            username: reply.author.username,
+            avatarUrl: reply.author.avatarUrl,
+          },
+        })) ?? [],
+    };
+  }
+
+  async createPost(authorId: string, dto: CreatePostDto) {
+    if (dto.replyToId) {
+      const parentPost = await this.prisma.post.findUnique({
+        where: {
+          id: dto.replyToId,
+        },
+      });
+
+      if (!parentPost) {
+        throw new NotFoundException('Parent post not found');
+      }
+    }
+    const post = await this.prisma.post.create({
+      data: {
+        content: dto.content,
+        authorId,
+        replyToId: dto.replyToId,
+        media: dto.mediaIds?.length
+          ? { connect: dto.mediaIds.map((id) => ({ id })) }
+          : undefined,
+      },
+
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        media: true,
+        _count: {
+          select: {
+            likes: true,
+            replies: true,
+          },
+        },
+      },
+    });
+
+    return this.mapPost(post);
+  }
+
+  async deletePost(currentUserId: string, postId: string) {
+    const post = await this.prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
     }
 
-    async createPost(authorId: string, dto: CreatePostDto) {
-        if (dto.replyToId) {
-            const parentPost =
-                await this.prisma.post.findUnique({
-                    where: {
-                        id: dto.replyToId,
-                    },
-                });
-
-            if (!parentPost) {
-                throw new NotFoundException(
-                    'Parent post not found',
-                );
-            }
-        }
-        const post =
-            await this.prisma.post.create({
-                data: {
-                    content: dto.content,
-                    authorId,
-                    replyToId: dto.replyToId,
-                    media: dto.mediaIds?.length ? { connect: dto.mediaIds.map(id => ({ id })) } : undefined,
-                },
-
-                include: {
-                    author: {
-                        select: {
-                            id: true,
-                            username: true,
-                            avatarUrl: true,
-                        },
-                    },
-                    media: true,
-                    _count: {
-                        select: {
-                            likes: true,
-                            replies: true,
-                        },
-                    },
-                },
-            });
-
-        return this.mapPost(post);
+    if (post.authorId !== currentUserId) {
+      throw new ForbiddenException('You cannot delete this post');
     }
 
-    async deletePost(
-        currentUserId: string,
-        postId: string,
-    ) {
-        const post = await this.prisma.post.findUnique({
-            where: {
-                id: postId,
-            },
-        });
+    await this.prisma.post.delete({
+      where: {
+        id: postId,
+      },
+    });
 
-        if (!post) {
-            throw new NotFoundException(
-                'Post not found',
-            );
-        }
+    return {
+      success: true,
+    };
+  }
 
-        if (post.authorId !== currentUserId) {
-            throw new ForbiddenException(
-                'You cannot delete this post',
-            );
-        }
+  async getPost(postId: string) {
+    const post = await this.prisma.post.findUnique({
+      where: {
+        id: postId,
+      },
 
-        await this.prisma.post.delete({
-            where: {
-                id: postId,
-            },
-        });
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        media: true,
+        _count: {
+          select: {
+            likes: true,
+            replies: true,
+          },
+        },
+      },
+    });
 
-        return {
-            success: true,
-        };
+    if (!post) {
+      throw new NotFoundException('Post not found');
     }
 
-    async getPost(postId: string) {
-        const post = await this.prisma.post.findUnique({
-            where: {
-                id: postId,
-            },
+    return this.mapPost(post);
+  }
 
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true,
-                        avatarUrl: true,
-                    },
-                },
-                media: true,
-                _count: {
-                    select: {
-                        likes: true,
-                        replies: true,
-                    },
-                },
-            },
-        });
+  async getUserTimeline(username: string, cursor?: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
 
-        if (!post) {
-            throw new NotFoundException(
-                'Post not found',
-            );
-        }
-
-        return this.mapPost(post);
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
-    async getUserTimeline(
-        username: string,
-        cursor?: string,
-    ) {
-        const user = await this.prisma.user.findUnique({
-            where: {
-                username,
-            },
-        });
+    const posts = await this.prisma.post.findMany({
+      where: {
+        authorId: user.id,
 
-        if (!user) {
-            throw new NotFoundException(
-                'User not found',
-            );
-        }
+        replyToId: null,
+      },
 
-        const posts = await this.prisma.post.findMany({
-            where: {
-                authorId: user.id,
+      orderBy: {
+        createdAt: 'desc',
+      },
 
-                replyToId: null,
-            },
+      take: TIMELINE_PAGE_SIZE + 1,
 
-            orderBy: {
-                createdAt: 'desc',
-            },
+      ...(cursor && {
+        cursor: {
+          id: cursor,
+        },
 
-            take: TIMELINE_PAGE_SIZE + 1,
+        skip: 1,
+      }),
 
-            ...(cursor && {
-                cursor: {
-                    id: cursor,
-                },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        media: true,
+        _count: {
+          select: {
+            likes: true,
+            replies: true,
+          },
+        },
+      },
+    });
 
-                skip: 1,
-            }),
+    let nextCursor: string | null = null;
 
-            include: {
-                author: {
-                    select: {
-                        id: true,
-                        username: true,
-                        avatarUrl: true,
-                    },
-                },
-                media: true,
-                _count: {
-                    select: {
-                        likes: true,
-                        replies: true,
-                    },
-                },
-            },
-        });
+    if (posts.length > TIMELINE_PAGE_SIZE) {
+      const nextItem = posts.pop();
 
-        let nextCursor: string | null = null;
-
-        if (posts.length > TIMELINE_PAGE_SIZE) {
-            const nextItem = posts.pop();
-
-            nextCursor = nextItem!.id;
-        }
-
-        return {
-            data: posts.map((post) =>
-                this.mapPost(post),
-            ),
-
-            nextCursor,
-        };
+      nextCursor = nextItem!.id;
     }
 
-    async createReply(postId: string, userId: string, dto: CreateReplyDto) {
+    return {
+      data: posts.map((post) => this.mapPost(post)),
 
-        const parent = await this.prisma.post.findUnique({ where: { id: postId } });
+      nextCursor,
+    };
+  }
 
-        if (!parent) {
-            throw new NotFoundException('Post not found');
-        }
+  async createReply(postId: string, userId: string, dto: CreateReplyDto) {
+    const parent = await this.prisma.post.findUnique({ where: { id: postId } });
 
-        const reply = await this.prisma.post.create({
-            data: {
-                content: dto.content,
-                author: {
-                    connect: {
-                        id: userId
-                    }
-                },
-                replyTo: {
-                    connect: {
-                        id: postId
-                    }
-                }
+    if (!parent) {
+      throw new NotFoundException('Post not found');
+    }
+
+    const reply = await this.prisma.post.create({
+      data: {
+        content: dto.content,
+        author: {
+          connect: {
+            id: userId,
+          },
+        },
+        replyTo: {
+          connect: {
+            id: postId,
+          },
+        },
+      },
+
+      include: {
+        author: true,
+        media: true,
+        _count: {
+          select: {
+            likes: true,
+            replies: true,
+          },
+        },
+      },
+    });
+
+    return this.mapPost(reply);
+  }
+
+  async getThread(postId: string) {
+    const thread = await this.prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        author: true,
+        media: true,
+        _count: {
+          select: {
+            likes: true,
+            replies: true,
+          },
+        },
+        replies: {
+          orderBy: { createdAt: 'asc' },
+          include: {
+            author: true,
+            _count: {
+              select: {
+                likes: true,
+                replies: true,
+              },
             },
+          },
+        },
+      },
+    });
 
-            include: {
-                author: true,
-                media: true,
-                _count: {
-                    select: {
-                        likes: true,
-                        replies: true,
-                    }
-                }
-            }
-        });
-
-        return this.mapPost(reply);
-    }
-
-    async getThread(postId: string) {
-        const thread = await this.prisma.post.findUnique({
-            where: { id: postId },
-            include: {
-                author: true,
-                media: true,
-                _count: {
-                    select: {
-                        likes: true,
-                        replies: true,
-                    }
-                },
-                replies: {
-                    orderBy: { createdAt: 'asc' },
-                    include: {
-                        author: true,
-                        _count: {
-                            select: {
-                                likes: true,
-                                replies: true,
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        return this.mapPost(thread);
-    }
+    return this.mapPost(thread);
+  }
 }

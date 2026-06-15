@@ -4,81 +4,86 @@ import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class NotificationsService {
-    constructor(
-        private readonly prisma: PrismaService,
-        private realtime: RealtimeGateway
-    ) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private realtime: RealtimeGateway,
+  ) {}
 
-    async createLikeNotification(actorId: string, postId: string, ownerId: string) {
-        if (actorId === ownerId) {
-            return;
-        }
-
-        await this.prisma.notification.create({
-            data: {
-                actorId,
-                recipientId: ownerId,
-                type: 'LIKE',
-                postId,
-            }
-        });
+  async createLikeNotification(
+    actorId: string,
+    postId: string,
+    ownerId: string,
+  ) {
+    if (actorId === ownerId) {
+      return;
     }
 
-    async createFollowNotification(actorId: string, recipientId: string) {
-        if (actorId === recipientId) {
-            return;
-        }
+    await this.prisma.notification.create({
+      data: {
+        actorId,
+        recipientId: ownerId,
+        type: 'LIKE',
+        postId,
+      },
+    });
+  }
 
-        await this.prisma.notification.create({
-            data: {
-                actorId,
-                recipientId,
-                type: 'FOLLOW'
-            }
-        });
-        
-        this.realtime.sendNotification(
-            recipientId,
-            {
-                type: 'FOLLOW',
-                actorId
-            }
-        );
+  async createFollowNotification(actorId: string, recipientId: string) {
+    if (actorId === recipientId) {
+      return;
     }
 
-    async createReplyNotification(actorId: string, postId: string, ownerId: string) {
-        if (actorId === ownerId) {
-            return;
-        }
-        await this.prisma.notification.create({
-            data: {
-                actorId,
-                recipientId: ownerId,
-                type: 'REPLY',
-                postId,
-            }
-        });
-    }
+    await this.prisma.notification.create({
+      data: {
+        actorId,
+        recipientId,
+        type: 'FOLLOW',
+      },
+    });
 
-    async getUserNotifications(userId: string) {
-        return this.prisma.notification.findMany({
-            where: {
-                recipientId: userId
-            },
-            orderBy: {
-                createdAt: 'desc'
-            },
-            take: 50,
-            include: {
-                actor: {
-                    select: {
-                        id: true,
-                        username: true,
-                        avatarUrl: true
-                    }
-                },
-                post: true
-            }
-        });
+    this.realtime.sendNotification(recipientId, {
+      type: 'FOLLOW',
+      actorId,
+    });
+  }
+
+  async createReplyNotification(
+    actorId: string,
+    postId: string,
+    ownerId: string,
+  ) {
+    if (actorId === ownerId) {
+      return;
     }
+    await this.prisma.notification.create({
+      data: {
+        actorId,
+        recipientId: ownerId,
+        type: 'REPLY',
+        postId,
+      },
+    });
+  }
+
+  async getUserNotifications(userId: string) {
+    return this.prisma.notification.findMany({
+      where: {
+        recipientId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 50,
+      include: {
+        actor: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
+          },
+        },
+        post: true,
+      },
+    });
+  }
 }
