@@ -6,7 +6,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 export class FollowsService {
     constructor(
         private readonly prisma: PrismaService,
-        private readonly notificationsService: NotificationsService
+        private readonly notifications: NotificationsService
     ) { }
 
     async followUser(
@@ -51,7 +51,7 @@ export class FollowsService {
             },
         });
 
-        await this.notificationsService.createFollowNotification(
+        await this.notifications.createFollowNotification(
             followerId,
             followingId
         );

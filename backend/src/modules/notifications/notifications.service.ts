@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService} from '../../database/prisma.service';
+import { PrismaService } from '../../database/prisma.service';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 
 @Injectable()
 export class NotificationsService {
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private realtime: RealtimeGateway
     ) { }
 
-    async createLikeNotification(actorId: string, postId: string,ownerId: string) {
+    async createLikeNotification(actorId: string, postId: string, ownerId: string) {
         if (actorId === ownerId) {
             return;
         }
@@ -34,6 +36,14 @@ export class NotificationsService {
                 type: 'FOLLOW'
             }
         });
+        
+        this.realtime.sendNotification(
+            recipientId,
+            {
+                type: 'FOLLOW',
+                actorId
+            }
+        );
     }
 
     async createReplyNotification(actorId: string, postId: string, ownerId: string) {
