@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: xclone-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: xclone
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    container_name: xclone-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL:
+        postgresql://postgres:postgres@postgres:5432/xclone
+      JWT_SECRET:
+        development-secret-change-this
+      FRONTEND_URL:
+        http://localhost:3000
+      PORT:
+        3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: xclone-frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL:
+        http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
