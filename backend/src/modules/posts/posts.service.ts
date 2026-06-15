@@ -18,7 +18,6 @@ export class PostsService {
             id: post.id,
             content: post.content,
             createdAt: post.createdAt,
-
             replyToId: post.replyToId,
 
             author: {
@@ -26,12 +25,24 @@ export class PostsService {
                 username: post.author.username,
                 avatarUrl: post.author.avatarUrl,
             },
+
             media: post.media ?? [],
 
             stats: {
-                likes: post._count.likes,
-                replies: post._count.replies,
+                likes: post._count?.likes ?? 0,
+                replies: post._count?.replies ?? 0,
             },
+
+            replies: post.replies?.map((reply: any) => ({
+                id: reply.id,
+                content: reply.content,
+                createdAt: reply.createdAt,
+                author: {
+                    id: reply.author.id,
+                    username: reply.author.username,
+                    avatarUrl: reply.author.avatarUrl,
+                },
+            })) ?? [],
         };
     }
 
@@ -258,9 +269,7 @@ export class PostsService {
 
     async getThread(postId: string) {
         const thread = await this.prisma.post.findUnique({
-            where: {
-                id: postId,
-            },
+            where: { id: postId },
             include: {
                 author: true,
                 media: true,
@@ -268,14 +277,18 @@ export class PostsService {
                     select: {
                         likes: true,
                         replies: true,
-                    },
+                    }
                 },
                 replies: {
-                    orderBy: {
-                        createdAt: 'asc'
-                    },
+                    orderBy: { createdAt: 'asc' },
                     include: {
-                        author: true
+                        author: true,
+                        _count: {
+                            select: {
+                                likes: true,
+                                replies: true,
+                            }
+                        }
                     }
                 }
             }
