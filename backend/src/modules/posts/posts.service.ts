@@ -67,9 +67,7 @@ export class PostsService {
                             avatarUrl: true,
                         },
                     },
-
                     media: true,
-
                     _count: {
                         select: {
                             likes: true,
@@ -129,9 +127,7 @@ export class PostsService {
                         avatarUrl: true,
                     },
                 },
-
                 media: true,
-
                 _count: {
                     select: {
                         likes: true,
@@ -195,9 +191,7 @@ export class PostsService {
                         avatarUrl: true,
                     },
                 },
-
                 media: true,
-
                 _count: {
                     select: {
                         likes: true,
@@ -249,9 +243,7 @@ export class PostsService {
 
             include: {
                 author: true,
-
                 media: true,
-
                 _count: {
                     select: {
                         likes: true,
@@ -260,12 +252,6 @@ export class PostsService {
                 }
             }
         });
-        
-        await this.notificationsService.createReplyNotification(
-            userId,
-            parent.authorId,
-            postId
-        );
 
         return this.mapPost(reply);
     }
@@ -277,6 +263,13 @@ export class PostsService {
             },
             include: {
                 author: true,
+                media: true,
+                _count: {
+                    select: {
+                        likes: true,
+                        replies: true,
+                    },
+                },
                 replies: {
                     orderBy: {
                         createdAt: 'asc'
@@ -288,6 +281,6 @@ export class PostsService {
             }
         });
 
-        return thread;
+        return this.mapPost(thread);
     }
 }
